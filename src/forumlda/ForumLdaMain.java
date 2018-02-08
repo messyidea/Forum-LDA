@@ -1,5 +1,8 @@
 package forumlda;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -14,6 +17,7 @@ public class ForumLdaMain {
 		// default parameters
 		String base = System.getProperty("user.dir") + "/data/";
 		String dataDir = base + "/forumdata/";
+		String dataFile = dataDir + "data.txt";
 		String resDir = base + "/modelres/";
 		String modelParamsFile = base + "/modelParameters.txt";
 		String stopWordsFile = base + "/stopwords.txt";
@@ -39,14 +43,36 @@ public class ForumLdaMain {
 		//Init
 		FileUtil.makeDir(resDir);
 		
-		ModelParams mp = new ModelParams();
-		mp.parseFromFile(modelParamsFile);
+		ModelParams modelParams = new ModelParams();
+		modelParams.parseFromFile(modelParamsFile);
 		
+		HashMap<String, Integer> wordMap = new HashMap<String, Integer>();
+		ArrayList<String> wordList = new ArrayList<String>();
+		HashMap<String, Integer> authorMap = new HashMap<String, Integer>();
+		ArrayList<String> authorList = new ArrayList<String>();
 		
+		ArrayList<Post> posts = new ArrayList<Post>();
+		readPostFromFile(dataFile, posts, wordMap, wordList, authorMap, authorList);
 		
 	}
 	
-	private static void getParamFromFile() {
+	public static void readPostFromFile(String filename, ArrayList<Post> posts, HashMap<String, Integer> wordMap, 
+			ArrayList<String> wordList, HashMap<String, Integer> authorMap, ArrayList<String> authorList) {
+		ArrayList<String> lines = new ArrayList<String>();
+		FileUtil.readLines(filename, lines);
 		
+		ArrayList<String> tPost = new ArrayList<String>();
+		for (int i = 0; i < lines.size(); i ++) {
+			String line = lines.get(i);
+			if (line.startsWith("-") || line.length() == 0) {
+				Post post = new Post(tPost, wordMap, wordList, authorMap, authorList);
+				if(post.id != -1) {
+					posts.add(post);
+				}
+				continue;
+			} 
+			tPost.add(line);
+		}
 	}
+	
 }
