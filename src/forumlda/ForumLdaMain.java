@@ -54,6 +54,13 @@ public class ForumLdaMain {
 		ArrayList<Post> posts = new ArrayList<Post>();
 		readPostFromFile(dataFile, posts, wordMap, wordList, authorMap, authorList);
 		
+		int wordNum = wordList.size();
+		int authorNum = authorList.size();
+		int postNum = posts.size();
+		modelParams.getExtraParams(wordNum, authorNum, postNum);
+		
+		Model m = new Model(modelParams, posts);
+		
 	}
 	
 	public static void readPostFromFile(String filename, ArrayList<Post> posts, HashMap<String, Integer> wordMap, 

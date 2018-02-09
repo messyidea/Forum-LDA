@@ -7,6 +7,8 @@ import common.FileUtil;
 public class ModelParams {
 	int K;
 	int U;
+	int W;
+	int P;
 	float alpha;
 	float beta;
 	int iteration;
@@ -35,5 +37,12 @@ public class ModelParams {
 				System.out.println("Unknow param: " + key);
 			}
 		}
+	}
+
+	public void getExtraParams(int wordNum, int authorNum, int postNum) {
+		// TODO Auto-generated method stub
+		this.U = authorNum;
+		this.W = wordNum;
+		this.P = postNum;
 	}
 }
