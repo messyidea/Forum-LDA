@@ -7,10 +7,13 @@ import common.FileUtil;
 public class ModelParams {
 	int K;
 	int U;
-	int W;
+	int V;
 	int P;
+	int S;
 	float alpha;
 	float beta;
+	float gamma;
+	
 	int iteration;
 	
 	public void parseFromFile(String filename) {
@@ -42,7 +45,7 @@ public class ModelParams {
 	public void getExtraParams(int wordNum, int authorNum, int postNum) {
 		// TODO Auto-generated method stub
 		this.U = authorNum;
-		this.W = wordNum;
+		this.V = wordNum;
 		this.P = postNum;
 	}
 }
