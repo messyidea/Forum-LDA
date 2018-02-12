@@ -23,8 +23,9 @@ public class Model {
 	float[] gamma;
 	float gammaSum;
 	
-	boolean[][][] x;
-	short[][] z;
+	boolean[][] x;
+	short[][] zw; // z word
+	short[][] zr; // z reply
 	short[][] y;
 	
 	float[][] uttheta;
@@ -40,6 +41,7 @@ public class Model {
 	
 	float[][] tphi;
 	int[][] countWT;
+
 	
 	public Model(ModelParams modelParams, ArrayList<Post> posts) {
 		// TODO Auto-generated constructor stub
@@ -137,6 +139,77 @@ public class Model {
 			}
 		}
 		
+	}
+	
+	public void intialize() {
+		System.out.println("Start init.");
+		
+		this.zw = new short[this.posts.size()][];
+		this.zr = new short[this.posts.size()][];
+		this.x = new boolean[this.posts.size()][];
+		
+		for (int i = 0; i < this.posts.size(); ++i) {
+			Post post = posts.get(i);
+			zw[i] = new short[post.contents.get(0).content.length];
+			zr[i] = new short[post.contents.size() - 1];
+			x[i] = new boolean[post.contents.size() - 1];
+			
+			Content rootPost = post.contents.get(0);
+			for(int j = 0; j < rootPost.content.length; ++j) {
+				double rand = Math.random();
+				double thred = 0;
+				short tp = 0;
+				for(short a = 0; a < T; ++a) {
+					thred += (double) 1.0 / T;
+					if (thred >= rand) {
+						tp = a;
+						break;
+					}
+				}
+				zw[i][j] = tp;
+				// count 
+				// ...
+			}
+			 for (int j = 1; j < post.contents.size(); ++j) {
+				 Content reply = post.contents.get(j);
+				 double rand = Math.random();
+				 boolean bufferX;
+				 if (rand > 0.5) {
+					 bufferX = true;
+				 } else {
+					 bufferX = false;
+				 }
+				 
+				 x[i][j-1] = bufferX;
+				 if (bufferX == true) {
+					 rand = Math.random();
+					 double thred = 0;
+					 short tp = 0;
+					 for (short a = 0; a < T; ++a) {
+						 thred += (double) 1.0 / T;
+						 if (thred > rand) {
+							 tp = a;
+							 break;
+						 }
+					 }
+					 zr[i][j-1] = tp;
+				 } else {
+					 rand = Math.random();
+					 double thred = 0;
+					 short tp = 0;
+					 for (short a = 0; a < S; ++a) {
+						 thred += (double) 1.0 / S;
+						 if (thred > rand) {
+							 tp = a;
+							 break;
+						 }
+					 }
+					 zr[i][j-1] = tp;
+				 }
+			 }
+			
+		}
+		System.out.println("End init.");
 	}
 
 }
