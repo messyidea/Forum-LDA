@@ -211,5 +211,52 @@ public class Model {
 		}
 		System.out.println("End init.");
 	}
+	
+	public void estimate() {
+		int niter = 0;
+		
+		while (true) {
+			niter ++;
+			oneIter();
+			
+			if (niter >= nIter) {
+				updateDistribution();
+				break;
+			}
+		}
+	}
+	
+	private void updateDistribution() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void oneIter() {
+		
+		for (int i = 0; i < this.posts.size(); ++i) {
+			Post post = posts.get(i);			
+			Content rootPost = post.contents.get(0);
+			for(int j = 0; j < rootPost.content.length; ++j) {
+				sampleRootWords(i, j, rootPost.content[j]);
+				// do sth
+				// ...
+			}
+			 for (int j = 1; j < post.contents.size(); ++j) {
+				 // do sth
+				 sampleReply(i, j, post.contents.get(j));
+			 }
+			
+		}
+	}
+
+	private void sampleReply(int i, int j, Content content) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void sampleRootWords(int i, int j, int word) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }
