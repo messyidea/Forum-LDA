@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class Model {
 	ArrayList<Post> posts;
 	
-	int T, S, V, U;
+	int T, S, V, U, P;
 	int nIter;
 	
 	float[] talpha;
@@ -34,13 +34,17 @@ public class Model {
 	
 	int[][] countUT;
 	int[][] countUS;
-	int[][] countZ;
+	int[][] countZ;		// post topic count
 	
 	float[][] sphi;
 	int[][] countWS;
 	
 	float[][] tphi;
-	int[][] countWT;
+	int[][] countWT; // words belong to T
+	
+	int[] countT;	// all word belong to T
+	
+//	int[][] countPT;	// post topic count
 
 	
 	public Model(ModelParams modelParams, ArrayList<Post> posts) {
@@ -51,6 +55,7 @@ public class Model {
 		this.S = modelParams.S;
 		this.V = modelParams.V;
 		this.U = modelParams.U;
+		this.P = this.posts.size();
 		
 		this.talpha = new float[T];
 		this.talphaSum = 0;
@@ -112,9 +117,9 @@ public class Model {
 			}
 		}
 		
-		this.ztheta = new float[U][T];
-		this.countZ = new int[U][T];
-		for (int i = 0; i < U; ++i) {
+		this.ztheta = new float[P][T];
+		this.countZ = new int[P][T];
+		for (int i = 0; i < P; ++i) {
 			for (int j = 0; j < T; ++j) {
 				this.ztheta[i][j] = 0;
 				this.countZ[i][j] = 0;
@@ -138,6 +143,16 @@ public class Model {
 				this.countWT[i][j] = 0;
 			}
 		}
+		
+		this.countT = new int[T];
+		for (int i = 0; i < T; ++i) {
+			this.countT[i] = 0;
+		}
+//		this.countPT = new int[P][T];
+		
+		
+		
+		
 		
 	}
 	
@@ -167,6 +182,9 @@ public class Model {
 					}
 				}
 				zw[i][j] = tp;
+				countZ[i][tp] ++;
+				countT[tp] ++;
+				countWT[tp][rootPost.content[j]] ++;
 				// count 
 				// ...
 			}
@@ -193,6 +211,7 @@ public class Model {
 						 }
 					 }
 					 zr[i][j-1] = tp;
+					 countUT[i][tp] ++;
 				 } else {
 					 rand = Math.random();
 					 double thred = 0;
@@ -205,6 +224,7 @@ public class Model {
 						 }
 					 }
 					 zr[i][j-1] = tp;
+					 countUS[i][tp] ++;
 				 }
 			 }
 			
@@ -238,13 +258,11 @@ public class Model {
 			Content rootPost = post.contents.get(0);
 			for(int j = 0; j < rootPost.content.length; ++j) {
 				sampleRootWords(i, j, rootPost.content[j]);
-				// do sth
-				// ...
 			}
-			 for (int j = 1; j < post.contents.size(); ++j) {
+			for (int j = 1; j < post.contents.size(); ++j) {
 				 // do sth
-				 sampleReply(i, j, post.contents.get(j));
-			 }
+				sampleReply(i, j, post.contents.get(j));
+			}
 			
 		}
 	}
@@ -256,7 +274,43 @@ public class Model {
 
 	private void sampleRootWords(int i, int j, int word) {
 		// TODO Auto-generated method stub
+		short z = zw[i][j];
+		countZ[i][z] --;
+		countWT[z][word] --;
 		
+		z = drawZ(i, j, word);
+		
+		countZ[i][z] ++;
+		countWT[z][word] ++;
+	}
+
+	private short drawZ(int p, int w, int word) {
+		// TODO Auto-generated method stub
+		double[] topicP;
+		topicP = new double[T];
+		
+		for (int i = 0; i < T; ++i) {
+			topicP[i] = (countZ[p][i] + countUT[p][i] + zalpha[i]) 
+					/ (posts.get(p).contents.get(0).content.length + posts.get(p).contents.size() - 1 + zalphaSum)
+					* (countWT[i][word] + tbeta[i]) 
+					/ (countT[i] + tbetaSum);
+			
+		}
+		
+		for (int i = 1; i < T; ++i) {
+			topicP[i] += topicP[i-1];
+		}
+		
+		double rand = Math.random() * topicP[T-1];
+		short topic = 0;
+		for (short i = 0; i < T; ++i) {
+			if(rand <= topicP[i]) {
+				topic = i;
+				break;
+			}
+		}
+		
+		return topic;
 	}
 
 }
