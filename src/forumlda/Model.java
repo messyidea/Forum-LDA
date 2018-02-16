@@ -1,6 +1,10 @@
 package forumlda;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 public class Model {
 	ArrayList<Post> posts;
@@ -33,8 +37,10 @@ public class Model {
 	float[][] ztheta;
 	
 	int[][] countUT;
-	int[][] countUS;
+	int[][] countUS;	// u， s replay的数量
 	int[][] countZ;		// post topic count
+	
+	int[][] countU;	// u， 2 reply的数量（0 or 1）
 	
 	float[][] sphi;
 	int[][] countWS;
@@ -43,6 +49,15 @@ public class Model {
 	int[][] countWT; // words belong to T
 	
 	int[] countT;	// all word belong to T
+	
+	int[][][] countUTSTW; // user type max(st) (word)
+	int[][] countUTW;	// user type (word)
+	
+	int[][] countSVW;
+	int[] countSW;
+	
+	int[][] countTVW;
+	int[] countTW;
 	
 //	int[][] countPT;	// post topic count
 
@@ -99,6 +114,13 @@ public class Model {
 			this.gammaSum += this.gamma[i];
 		}
 		
+		this.countU = new int[U][2];
+		for (int i = 0; i < U; ++i) {
+			for (int j = 0; j < 2; ++j) {
+				this.countU[i][j] = 0;
+			}
+		}
+		
 		this.uttheta = new float[U][T];
 		this.countUT = new int[U][T];
 		for (int i = 0; i < U; ++i) {
@@ -111,7 +133,7 @@ public class Model {
 		this.ustheta = new float[U][S];
 		this.countUS = new int[U][S];
 		for (int i = 0; i < U; ++i) {
-			for (int j = 0; j < T; ++j) {
+			for (int j = 0; j < S; ++j) {
 				this.ustheta[i][j] = 0;
 				this.countUS[i][j] = 0;
 			}
@@ -261,15 +283,106 @@ public class Model {
 			}
 			for (int j = 1; j < post.contents.size(); ++j) {
 				 // do sth
-				sampleReply(i, j, post.contents.get(j));
+				sampleReply(i, j-1, post.contents.get(j));
 			}
 			
 		}
 	}
 
-	private void sampleReply(int i, int j, Content content) {
+	private void sampleReply(int p, int w, Content content) {
 		// TODO Auto-generated method stub
+		// --
 		
+		int rst = drawReply(p, w, content);
+		
+		if (rst < S) {
+			;
+		} else {
+			;
+		}
+		
+		// ++
+	}
+
+	private int drawReply(int p, int w, Content content) {
+		// TODO Auto-generated method stub
+		int word;
+		
+		HashMap<Integer, Integer> wordCnt = new HashMap<Integer, Integer>();
+		for (int i = 0; i < content.content.length; ++i) {
+			word = content.content[i];
+			if (!wordCnt.containsKey(word)) {
+				wordCnt.put(word, 1);
+			} else {
+				int count = wordCnt.get(word) + 1;
+				wordCnt.put(word, count);
+			}
+		}
+		
+		double[] topicP;
+		topicP = new double[S+T];
+		int u = content.author;
+		
+		for(int i = 0; i < S; ++i) {
+			topicP[i] = (countU[u][0] + gamma[0]) 
+					* (countUTSTW[u][0][i] + salpha[i])
+					/ (countUTW[u][0] + salphaSum);
+			
+			int t = 0;
+			Set s = wordCnt.entrySet();
+			Iterator it = s.iterator();
+			double bufferP = 0;
+			while(it.hasNext()) {
+				Map.Entry m = (Map.Entry) it.next();
+				word = (Integer) m.getKey();
+				int count = (Integer) m.getValue();
+				for (int j = 0; j < count; ++j) {
+					double value = (countSVW[i][word] + sbeta[word] + j)
+							/ (countSW[i] + sbetaSum + t);
+					t ++;
+					bufferP *= value;
+				}
+			}
+			topicP[i] *= Math.pow(bufferP, 1.0);
+		}
+		
+		for (int i = 0; i < T; ++i) {
+			// lost some thing
+			topicP[S + i] = (countU[u][1] + gamma[1]) 
+					* (countUTSTW[u][1][i] + talpha[i])
+					/ (countUTW[u][1] + talphaSum);
+			
+			int t = 0;
+			Set s = wordCnt.entrySet();
+			Iterator it = s.iterator();
+			double bufferP = 0;
+			while(it.hasNext()) {
+				Map.Entry m = (Map.Entry) it.next();
+				word = (Integer) m.getKey();
+				int count = (Integer) m.getValue();
+				for (int j = 0; j < count; ++j) {
+					double value = (countTVW[i][word] + tbeta[word] + j)
+							/ (countTW[i] + tbetaSum + t);
+					t ++;
+					bufferP *= value;
+				}
+			}
+			topicP[S + i] *= Math.pow(bufferP, 1.0);
+		}
+		
+		for (int i = 1; i < T+S; ++i) {
+			topicP[i] += topicP[i-1];
+		}
+		double rand = Math.random() * topicP[T+S-1];
+		int rst = 0;
+		for (int i = 0; i < T+S; ++i) {
+			if (topicP[i] >= rand) {
+				rst = i;
+				break;
+			}
+		}
+		
+		return rst;
 	}
 
 	private void sampleRootWords(int i, int j, int word) {
