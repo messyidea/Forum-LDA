@@ -501,7 +501,7 @@ public class Model {
 		
 		for (int i = 0; i < T; ++i) {
 			topicP[i] = (countPTW[p][i] + countPTR[p][i] + zalpha[i]) 
-					/ (posts.get(p).contents.get(0).content.length + posts.get(p).contents.size() - 1 + zalphaSum)
+					/ (posts.get(p).contents.get(0).content.length + posts.get(p).contents.size() - 1 - 2 + zalphaSum)
 					* (countTVW[i][word] + tbeta[i]) 
 					/ (countTW[i] + tbetaSum);
 			
