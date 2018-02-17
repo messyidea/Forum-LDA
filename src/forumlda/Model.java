@@ -36,30 +36,45 @@ public class Model {
 	float[][] ustheta;
 	float[][] ztheta;
 	
-	int[][] countUT;
-	int[][] countUS;	// u， s replay的数量
-	int[][] countZ;		// post topic count
-	
-	int[][] countU;	// u， 2 reply的数量（0 or 1）
-	
 	float[][] sphi;
-	int[][] countWS;
-	
 	float[][] tphi;
-	int[][] countWT; // words belong to T
 	
-	int[] countT;	// all word belong to T
-	
-	int[][][] countUTSTW; // user type max(st) (word)
-	int[][] countUTW;	// user type (word)
-	
-	int[][] countSVW;
-	int[] countSW;
-	
+	int[][] countPTW;  // only for root post
 	int[][] countTVW;
+	int[][] countPTR;
 	int[] countTW;
+	int[] countSW;
+	int[][] countU2R;
+	int[][] countUTW;
+	int[][] countUSW;
+	int[][] countU2W;
+	int[][] countSVW;
 	
-//	int[][] countPT;	// post topic count
+
+//	int[][] countUT;
+//	int[][] countUS;	// u， s replay的数量
+//	int[][] countZ;		// post topic count
+//	
+//	int[][] countU;	// u， 2 reply的数量（0 or 1）
+//	
+//	float[][] sphi;
+//	int[][] countWS;
+//	
+//	float[][] tphi;
+//	int[][] countWT; // words belong to T
+//	
+//	int[] countT;	// all word belong to T
+//	
+//	int[][][] countUTSTW; // user type max(st) (word)
+//	int[][] countUTW;	// user type (word)
+//	
+//	int[][] countSVW;
+//	int[] countSW;
+//	
+//	int[][] countTVW;
+//	int[] countTW;
+//	
+////	int[][] countPT;	// post topic count
 
 	
 	public Model(ModelParams modelParams, ArrayList<Post> posts) {
@@ -114,68 +129,73 @@ public class Model {
 			this.gammaSum += this.gamma[i];
 		}
 		
-		this.countU = new int[U][2];
-		for (int i = 0; i < U; ++i) {
-			for (int j = 0; j < 2; ++j) {
-				this.countU[i][j] = 0;
-			}
-		}
 		
 		this.uttheta = new float[U][T];
-		this.countUT = new int[U][T];
+		this.countUTW = new int[U][T];
 		for (int i = 0; i < U; ++i) {
 			for (int j = 0; j < T; ++j) {
 				this.uttheta[i][j] = 0;
-				this.countUT[i][j] = 0;
+				this.countUTW[i][j] = 0;
 			}
 		}
 		
 		this.ustheta = new float[U][S];
-		this.countUS = new int[U][S];
+		this.countUSW = new int[U][S];
 		for (int i = 0; i < U; ++i) {
 			for (int j = 0; j < S; ++j) {
 				this.ustheta[i][j] = 0;
-				this.countUS[i][j] = 0;
+				this.countUSW[i][j] = 0;
 			}
 		}
 		
 		this.ztheta = new float[P][T];
-		this.countZ = new int[P][T];
+		this.countPTW = new int[P][T];
+		this.countPTR = new int[P][T];
 		for (int i = 0; i < P; ++i) {
 			for (int j = 0; j < T; ++j) {
 				this.ztheta[i][j] = 0;
-				this.countZ[i][j] = 0;
+				this.countPTW[i][j] = 0;
+				this.countPTR[i][j] = 0;
 			}
 		}
 		
 		this.sphi = new float[S][V];
-		this.countWS = new int[S][V];
+		this.countSVW = new int[S][V];
 		for (int i = 0; i < S ; ++i) {
 			for (int j = 0; j < V; ++j) {
 				this.sphi[i][j] = 0;
-				this.countWS[i][j] = 0;
+				this.countSVW[i][j] = 0;
 			}
 		}
 		
 		this.tphi = new float[T][V];
-		this.countWT = new int[T][V];
+		this.countTVW = new int[T][V];
 		for (int i = 0; i < T ; ++i) {
 			for (int j = 0; j < V; ++j) {
 				this.tphi[i][j] = 0;
-				this.countWT[i][j] = 0;
+				this.countTVW[i][j] = 0;
 			}
 		}
 		
-		this.countT = new int[T];
-		for (int i = 0; i < T; ++i) {
-			this.countT[i] = 0;
+		this.countU2R = new int[U][2];
+		this.countU2W = new int[U][2];
+		for (int i = 0; i < U; ++i) {
+			for (int j = 0; j < 2; ++j) {
+				this.countU2R[i][j] = 0;
+				this.countU2W[i][j] = 0;
+			}
 		}
-//		this.countPT = new int[P][T];
 		
+		this.countTW = new int[T];
+		for (int i = 0; i < T; ++i) {
+			this.countTW[i] = 0;
+		}
 		
-		
-		
-		
+		this.countSW = new int[T];
+		for (int i = 0; i < S; ++i) {
+			this.countSW[i] = 0;
+		}
+				
 	}
 	
 	public void intialize() {
@@ -204,9 +224,16 @@ public class Model {
 					}
 				}
 				zw[i][j] = tp;
-				countZ[i][tp] ++;
-				countT[tp] ++;
-				countWT[tp][rootPost.content[j]] ++;
+				
+				countPTW[i][tp] ++;
+				countTVW[tp][rootPost.content[j]] ++;
+				countTW[tp] ++;
+				countU2W[rootPost.author][0] ++;
+				countUTW[rootPost.author][z] ++;
+				
+//				countZ[i][tp] ++;
+//				countT[tp] ++;
+//				countWT[tp][rootPost.content[j]] ++;
 				// count 
 				// ...
 			}
@@ -233,7 +260,18 @@ public class Model {
 						 }
 					 }
 					 zr[i][j-1] = tp;
-					 countUT[i][tp] ++;
+					 
+					 countPTR[i][tp] ++;
+					 countU2R[reply.author][1] ++;
+					 
+					 for (int k = 0; k < reply.content.length; ++k) {
+						 int word = reply.content[k];
+						 countTVW[tp][word] ++;
+						 countTW[tp] ++;
+						 countU2W[reply.author][1] ++;
+						 countUTW[reply.author][tp] ++;
+					 }
+//					 countUT[i][tp] ++;
 				 } else {
 					 rand = Math.random();
 					 double thred = 0;
@@ -246,7 +284,17 @@ public class Model {
 						 }
 					 }
 					 zr[i][j-1] = tp;
-					 countUS[i][tp] ++;
+					 
+					 countU2R[reply.author][0] ++;
+//					 countUS[i][tp] ++;
+					 for (int k = 0; k < reply.content.length; ++k) {
+						 int word = reply.content[k];
+						 countSVW[tp][word] ++;
+						 countSW[tp] ++;
+						 countU2W[reply.author][0] ++;
+						 countUSW[reply.author][tp] ++;
+						 
+					 }
 				 }
 			 }
 			
@@ -291,17 +339,63 @@ public class Model {
 
 	private void sampleReply(int p, int w, Content content) {
 		// TODO Auto-generated method stub
-		// --
+		boolean rstX = x[p][w];
+		short rstZ = zr[p][w];
+		
+		for (int i = 0; i < content.content.length; ++i) {
+			int word = content.content[i];
+			if (rstX == false) {
+				countSVW[rstZ][word] --;
+				countSW[rstZ] --;
+				countU2W[content.author][0] --;
+				countUSW[content.author][rstZ] --;
+			} else {
+				countTVW[rstZ][word] --;
+				countTW[rstZ] --;
+				countU2W[content.author][1] --;
+				countUTW[content.author][rstZ] --;
+			}
+		}
+		
+		// -- sample
+		if (rstX == false) {
+			countU2R[content.author][0] --;
+		} else {
+			countU2R[content.author][1] --;
+		}
 		
 		int rst = drawReply(p, w, content);
 		
 		if (rst < S) {
-			;
+			rstX = false;
+			rstZ = (short)rst;
 		} else {
-			;
+			rstX = true;
+			rstZ = (short)(rst - S);
 		}
 		
-		// ++
+		// recover
+		for (int i = 0; i < content.content.length; ++i) {
+			int word = content.content[i];
+			if (rstX == false) {
+				countSVW[rstZ][word] --;
+				countSW[rstZ] --;
+				countU2W[content.author][0] --;
+				countUSW[content.author][rstZ] --;
+			} else {
+				countTVW[rstZ][word] --;
+				countTW[rstZ] --;
+				countU2W[content.author][1] --;
+				countUTW[content.author][rstZ] --;
+			}
+		}
+		
+		if (rstX == false) {
+			countU2R[content.author][0] --;
+		} else {
+			countU2R[content.author][1] --;
+		}
+
 	}
 
 	private int drawReply(int p, int w, Content content) {
@@ -324,9 +418,9 @@ public class Model {
 		int u = content.author;
 		
 		for(int i = 0; i < S; ++i) {
-			topicP[i] = (countU[u][0] + gamma[0]) 
-					* (countUTSTW[u][0][i] + salpha[i])
-					/ (countUTW[u][0] + salphaSum);
+			topicP[i] = (countU2R[u][0] + gamma[0]) 
+					* (countUSW[u][i] + salpha[i])
+					/ (countU2W[u][0] + salphaSum);
 			
 			int t = 0;
 			Set s = wordCnt.entrySet();
@@ -348,9 +442,9 @@ public class Model {
 		
 		for (int i = 0; i < T; ++i) {
 			// lost some thing
-			topicP[S + i] = (countU[u][1] + gamma[1]) 
-					* (countUTSTW[u][1][i] + talpha[i])
-					/ (countUTW[u][1] + talphaSum);
+			topicP[S + i] = (countU2R[u][1] + gamma[1]) 
+					* (countUTW[u][i] + talpha[i])
+					/ (countU2W[u][1] + talphaSum);
 			
 			int t = 0;
 			Set s = wordCnt.entrySet();
@@ -388,13 +482,16 @@ public class Model {
 	private void sampleRootWords(int i, int j, int word) {
 		// TODO Auto-generated method stub
 		short z = zw[i][j];
-		countZ[i][z] --;
-		countWT[z][word] --;
+		countPTW[i][z] --;
+		countTVW[z][word] --;
+		countTW[z] --;
 		
 		z = drawZ(i, j, word);
 		
-		countZ[i][z] ++;
-		countWT[z][word] ++;
+		countPTW[i][z] ++;
+		countTVW[z][word] ++;
+		countTW[z] ++;
+
 	}
 
 	private short drawZ(int p, int w, int word) {
@@ -403,10 +500,10 @@ public class Model {
 		topicP = new double[T];
 		
 		for (int i = 0; i < T; ++i) {
-			topicP[i] = (countZ[p][i] + countUT[p][i] + zalpha[i]) 
+			topicP[i] = (countPTW[p][i] + countPTR[p][i] + zalpha[i]) 
 					/ (posts.get(p).contents.get(0).content.length + posts.get(p).contents.size() - 1 + zalphaSum)
-					* (countWT[i][word] + tbeta[i]) 
-					/ (countT[i] + tbetaSum);
+					* (countTVW[i][word] + tbeta[i]) 
+					/ (countTW[i] + tbetaSum);
 			
 		}
 		
