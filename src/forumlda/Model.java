@@ -229,7 +229,7 @@ public class Model {
 				countTVW[tp][rootPost.content[j]] ++;
 				countTW[tp] ++;
 				countU2W[rootPost.author][0] ++;
-				countUTW[rootPost.author][z] ++;
+				countUTW[rootPost.author][tp] ++;
 				
 //				countZ[i][tp] ++;
 //				countT[tp] ++;
