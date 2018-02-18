@@ -5,11 +5,12 @@ import java.util.ArrayList;
 import common.FileUtil;
 
 public class ModelParams {
-	int K;
+	int T;
+	int S;
 	int U;
 	int V;
 	int P;
-	int S;
+
 	float alpha;
 	float beta;
 	float gamma;
@@ -24,14 +25,20 @@ public class ModelParams {
 			String key = strArr[0].trim();
 			String value = strArr[1].trim();
 			switch(key) {
-			case "topics":
-				this.K = Integer.parseInt(value);
+			case "serious_topics":
+				this.T = Integer.parseInt(value);
+				break;
+			case "unserious_topics":
+				this.S = Integer.parseInt(value);
 				break;
 			case "alpha":
 				this.alpha = Float.parseFloat(value);
 				break;
 			case "beta":
 				this.beta = Float.parseFloat(value);
+				break;
+			case "gamma":
+				this.gamma = Float.parseFloat(value);
 				break;
 			case "iteration":
 				this.iteration = Integer.parseInt(value);

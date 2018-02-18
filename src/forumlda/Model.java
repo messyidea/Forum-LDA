@@ -32,9 +32,10 @@ public class Model {
 	short[][] zr; // z reply
 	short[][] y;
 	
-	float[][] uttheta;
-	float[][] ustheta;
 	float[][] ztheta;
+	float[][] lambda;
+	float[][] seta;
+	float[][] teta;
 	
 	float[][] sphi;
 	float[][] tphi;
@@ -55,7 +56,7 @@ public class Model {
 		// TODO Auto-generated constructor stub
 		this.posts = posts;
 		
-		this.T = modelParams.K;
+		this.T = modelParams.T;
 		this.S = modelParams.S;
 		this.V = modelParams.V;
 		this.U = modelParams.U;
@@ -104,21 +105,21 @@ public class Model {
 		}
 		
 		
-		this.uttheta = new float[U][T];
 		this.countUTW = new int[U][T];
+		this.teta = new float[U][T];
 		for (int i = 0; i < U; ++i) {
 			for (int j = 0; j < T; ++j) {
-				this.uttheta[i][j] = 0;
 				this.countUTW[i][j] = 0;
+				this.teta[i][j] = 0;
 			}
 		}
 		
-		this.ustheta = new float[U][S];
 		this.countUSW = new int[U][S];
+		this.seta = new float[U][S];
 		for (int i = 0; i < U; ++i) {
 			for (int j = 0; j < S; ++j) {
-				this.ustheta[i][j] = 0;
 				this.countUSW[i][j] = 0;
+				this.seta[i][j] = 0;
 			}
 		}
 		
@@ -153,10 +154,12 @@ public class Model {
 		
 		this.countU2R = new int[U][2];
 		this.countU2W = new int[U][2];
+		this.lambda = new float[U][2];
 		for (int i = 0; i < U; ++i) {
 			for (int j = 0; j < 2; ++j) {
 				this.countU2R[i][j] = 0;
 				this.countU2W[i][j] = 0;
+				this.lambda[i][j] = 0;
 			}
 		}
 		
@@ -285,6 +288,47 @@ public class Model {
 	
 	private void updateDistribution() {
 		// TODO Auto-generated method stub
+		for (int i = 0; i < P; ++i) {
+			for (int j = 0; j < T; ++j) {
+				ztheta[i][j] = (countPTW[i][j] + countPTR[i][j] + zalpha[T])
+						/ (posts.get(i).contents.get(0).content.length + posts.get(i).contents.size() - 1 + zalphaSum);
+			}
+		}
+		
+		for (int i = 0; i < S; ++i) {
+			for (int j = 0; j < V; ++j) {
+				sphi[i][j] = (countSVW[i][j] + sbeta[j])
+						/ (countSW[i] + sbetaSum);
+			}
+		}
+		
+		for (int i = 0; i < T; ++i) {
+			for (int j = 0; j < V; ++j) {
+				tphi[i][j] = (countTVW[i][j] + tbeta[j])
+						/ (countTW[i] + tbetaSum);
+			}
+		}
+		
+		for (int i = 0; i < U; ++i) {
+			for (int j = 0; j < 2; ++j) {
+				lambda[i][j] = (countU2R[i][j] + gamma[j])
+						/ (countU2R[i][0] + countU2R[i][1] + gammaSum);
+			}
+		}
+		
+		for (int i = 0; i < U; ++i) {
+			for (int j = 0; j < S; ++j) {
+				seta[i][j] = (countUSW[i][j] + salpha[j])
+						/ (countU2W[i][0] + salphaSum);
+			}
+		}
+		
+		for (int i = 0; i < U; ++i) {
+			for (int j = 0; j < T; ++j) {
+				teta[i][j] = (countUTW[i][j] + talpha[j])
+						/ (countU2W[i][1] + talphaSum);
+			}
+		}
 		
 	}
 
