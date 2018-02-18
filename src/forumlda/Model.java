@@ -49,32 +49,6 @@ public class Model {
 	int[][] countUSW;
 	int[][] countU2W;
 	int[][] countSVW;
-	
-
-//	int[][] countUT;
-//	int[][] countUS;	// u， s replay的数量
-//	int[][] countZ;		// post topic count
-//	
-//	int[][] countU;	// u， 2 reply的数量（0 or 1）
-//	
-//	float[][] sphi;
-//	int[][] countWS;
-//	
-//	float[][] tphi;
-//	int[][] countWT; // words belong to T
-//	
-//	int[] countT;	// all word belong to T
-//	
-//	int[][][] countUTSTW; // user type max(st) (word)
-//	int[][] countUTW;	// user type (word)
-//	
-//	int[][] countSVW;
-//	int[] countSW;
-//	
-//	int[][] countTVW;
-//	int[] countTW;
-//	
-////	int[][] countPT;	// post topic count
 
 	
 	public Model(ModelParams modelParams, ArrayList<Post> posts) {
@@ -230,12 +204,7 @@ public class Model {
 				countTW[tp] ++;
 				countU2W[rootPost.author][0] ++;
 				countUTW[rootPost.author][tp] ++;
-				
-//				countZ[i][tp] ++;
-//				countT[tp] ++;
-//				countWT[tp][rootPost.content[j]] ++;
-				// count 
-				// ...
+
 			}
 			 for (int j = 1; j < post.contents.size(); ++j) {
 				 Content reply = post.contents.get(j);
@@ -271,7 +240,6 @@ public class Model {
 						 countU2W[reply.author][1] ++;
 						 countUTW[reply.author][tp] ++;
 					 }
-//					 countUT[i][tp] ++;
 				 } else {
 					 rand = Math.random();
 					 double thred = 0;
@@ -286,7 +254,6 @@ public class Model {
 					 zr[i][j-1] = tp;
 					 
 					 countU2R[reply.author][0] ++;
-//					 countUS[i][tp] ++;
 					 for (int k = 0; k < reply.content.length; ++k) {
 						 int word = reply.content[k];
 						 countSVW[tp][word] ++;
