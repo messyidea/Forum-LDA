@@ -11,6 +11,7 @@ public class Model {
 	
 	int T, S, V, U, P;
 	int nIter;
+	int topNum;
 	
 	float[] talpha;
 	float talphaSum;
@@ -55,6 +56,9 @@ public class Model {
 	public Model(ModelParams modelParams, ArrayList<Post> posts) {
 		// TODO Auto-generated constructor stub
 		this.posts = posts;
+		
+		this.nIter = modelParams.iteration;
+		this.topNum = modelParams.topNum;
 		
 		this.T = modelParams.T;
 		this.S = modelParams.S;

@@ -16,6 +16,7 @@ public class ModelParams {
 	float gamma;
 	
 	int iteration;
+	int topNum;
 	
 	public void parseFromFile(String filename) {
 		ArrayList<String> lines = new ArrayList<String>();
@@ -42,6 +43,9 @@ public class ModelParams {
 				break;
 			case "iteration":
 				this.iteration = Integer.parseInt(value);
+				break;
+			case "top_num":
+				this.topNum = Integer.parseInt(value);
 				break;
 			default:
 				System.out.println("Unknow param: " + key);
