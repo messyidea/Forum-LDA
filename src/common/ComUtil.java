@@ -5,7 +5,7 @@ import java.util.HashSet;
 
 public class ComUtil {
 	
-	public static void getTop(double[] array, ArrayList<Integer> rankList, int cnt) {
+	public static void getTop(float[] array, ArrayList<Integer> rankList, int cnt) {
 		int p = 0;
 		HashSet<Integer> scanned = new HashSet<Integer>();
 		double max = Double.MIN_VALUE;
@@ -27,7 +27,7 @@ public class ComUtil {
 		}
 	}
 	
-	public static void getTop(ArrayList<Double>  array, ArrayList<Integer> rankList, int cnt) {
+	public static void getTop(ArrayList<Float>  array, ArrayList<Integer> rankList, int cnt) {
 		int p = 0;
 		HashSet<Integer> scanned = new HashSet<Integer>();
 		double max = Double.MIN_VALUE;

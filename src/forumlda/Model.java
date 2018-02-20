@@ -1,10 +1,16 @@
 package forumlda;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import common.ComUtil;
 
 public class Model {
 	ArrayList<Post> posts;
@@ -536,6 +542,42 @@ public class Model {
 		}
 		
 		return topic;
+	}
+
+	public void outputResult(String filename, ArrayList<String> wordList) throws IOException {
+		BufferedWriter writer = new BufferedWriter(new FileWriter(new File(
+				filename)));
+		ArrayList<Integer> rankList = new ArrayList<Integer>();
+		
+		writer.write("Serious topics: \n");
+		for (int i = 0; i < T; ++i) {
+			rankList.clear();
+			
+			ComUtil.getTop(tphi[i], rankList, topNum);
+			
+			for (int j = 0; j < rankList.size(); ++j) {
+				String tmp = "\t" + wordList.get(rankList.get(i)) + "\t"
+						+ tphi[rankList.get(i)];
+				writer.write(tmp + "\n");
+			}
+		}
+		
+		writer.write("Unserious topics: \n");
+		for (int i = 0; i < S; ++i) {
+			rankList.clear();
+			
+			ComUtil.getTop(sphi[i], rankList, topNum);
+			
+			for (int j = 0; j < rankList.size(); ++j) {
+				String tmp = "\t" + wordList.get(rankList.get(i)) + "\t"
+						+ sphi[rankList.get(i)];
+				writer.write(tmp + "\n");
+			}
+		}
+		
+		writer.flush();
+		writer.close();
+		
 	}
 
 }

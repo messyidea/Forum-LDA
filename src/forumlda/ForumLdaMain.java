@@ -21,6 +21,7 @@ public class ForumLdaMain {
 		String resDir = base + "/modelres/";
 		String modelParamsFile = base + "/modelParameters.txt";
 		String stopWordsFile = base + "/stopwords.txt";
+		String wordsOfTopics = resDir + "wordsoftopics.txt";
 		
 		//CLI parse
 		Options options = new Options();
@@ -60,6 +61,10 @@ public class ForumLdaMain {
 		modelParams.getExtraParams(wordNum, authorNum, postNum);
 		
 		Model m = new Model(modelParams, posts);
+		m.intialize();
+		m.estimate();
+		
+		m.outputResult(wordsOfTopics, wordList);
 		
 	}
 	
