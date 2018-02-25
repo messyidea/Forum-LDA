@@ -433,7 +433,7 @@ public class Model {
 	private int drawReply(int p, int w, Content content) {
 		// TODO Auto-generated method stub
 		int word;
-		
+		int[] pCount = new int[T+S];
 		
 		HashMap<Integer, Integer> wordCnt = new HashMap<Integer, Integer>();
 		for (int i = 0; i < content.content.length; ++i) {
@@ -467,7 +467,7 @@ public class Model {
 			Set s = wordCnt.entrySet();
 			Iterator it = s.iterator();
 			double bufferP = 1;
-			System.out.println("buffer P == " + bufferP);
+//			System.out.println("buffer P == " + bufferP);
 			while(it.hasNext()) {
 				Map.Entry m = (Map.Entry) it.next();
 				word = (Integer) m.getKey();
@@ -478,6 +478,7 @@ public class Model {
 					t ++;
 //					System.out.println("value == " + value);
 					bufferP *= value;
+					bufferP = isOverFlow(bufferP, pCount, i);
 //					System.out.println("buffer P == " + bufferP);
 				}
 			}
@@ -507,10 +508,13 @@ public class Model {
 							/ (countTW[i] + tbetaSum + t);
 					t ++;
 					bufferP *= value;
+					bufferP = isOverFlow(bufferP, pCount, S+i);
 				}
 			}
 			topicP[S + i] *= Math.pow(bufferP, 1.0);
 		}
+		
+		reComputeProbs(topicP, pCount);
 		
 //		for (int i = 0; i < T+S; ++i) {
 //			System.out.print("  " + topicP[i]);
@@ -531,6 +535,41 @@ public class Model {
 		}
 		
 		return rst;
+	}
+
+	private void reComputeProbs(double[] topicP, int[] pCount) {
+		int max = pCount[0];
+		// System.out.print(max + " ");
+		for (int i = 1; i < pCount.length; ++i) {
+			if (pCount[i] > max)
+				max = pCount[i];
+			// System.out.print(pCount[i] + " ");
+		}
+		
+		for (int i = 0; i < pCount.length; i++) {
+			topicP[i] = topicP[i] * Math.pow(1e150, pCount[i] - max);
+		}
+		
+//		if (max > 0) {
+//			System.out.print(pCount[0] + " ");
+//			for (int i = 1; i < pCount.length; i++) {
+//				System.out.print(pCount[i] + " ");
+//			}
+//			System.out.println();
+//			// System.exit(0);
+//		}
+	}
+
+	private double isOverFlow(double bufferP, int[] pCount, int i) {
+		if (bufferP > 1e150) {
+			pCount[i]++;
+			return bufferP / 1e150;
+		}
+		if (bufferP < 1e-150) {
+			pCount[i]--;
+			return bufferP * 1e150;
+		}
+		return bufferP;
 	}
 
 	private void sampleRootWords(int i, int j, int word) {
