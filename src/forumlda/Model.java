@@ -81,7 +81,7 @@ public class Model {
 		
 		this.salpha = new float[S];
 		this.salphaSum = 0;
-		for (int i = 0; i < T; ++i) {
+		for (int i = 0; i < S; ++i) {
 			this.salpha[i] = modelParams.alpha;
 			this.salphaSum += this.salpha[i];
 		}
@@ -283,13 +283,16 @@ public class Model {
 	}
 	
 	public void estimate() {
+		System.out.println("Start estimate");
 		int niter = 0;
 		
 		while (true) {
+			System.out.println("iterator " + Integer.toString(niter));
 			niter ++;
 			oneIter();
 			
 			if (niter >= nIter) {
+				
 				updateDistribution();
 				break;
 			}
@@ -297,10 +300,10 @@ public class Model {
 	}
 	
 	private void updateDistribution() {
-		// TODO Auto-generated method stub
+		System.out.println("Start update distribution.");
 		for (int i = 0; i < P; ++i) {
 			for (int j = 0; j < T; ++j) {
-				ztheta[i][j] = (countPTW[i][j] + countPTR[i][j] + zalpha[T])
+				ztheta[i][j] = (countPTW[i][j] + countPTR[i][j] + zalpha[j])
 						/ (posts.get(i).contents.get(0).content.length + posts.get(i).contents.size() - 1 + zalphaSum);
 			}
 		}
@@ -339,12 +342,14 @@ public class Model {
 						/ (countU2W[i][1] + talphaSum);
 			}
 		}
+		System.out.println("End update distribution.");
 		
 	}
 
 	public void oneIter() {
 		
 		for (int i = 0; i < this.posts.size(); ++i) {
+			System.out.println("sample post " + i);
 			Post post = posts.get(i);			
 			Content rootPost = post.contents.get(0);
 			for(int j = 0; j < rootPost.content.length; ++j) {
@@ -395,26 +400,32 @@ public class Model {
 			rstZ = (short)(rst - S);
 		}
 		
+		x[p][w] = rstX;
+		zr[p][w] = rstZ;
+		
+//		System.out.println("r z == " + rstZ);
+		
+		
 		// recover
 		for (int i = 0; i < content.content.length; ++i) {
 			int word = content.content[i];
 			if (rstX == false) {
-				countSVW[rstZ][word] --;
-				countSW[rstZ] --;
-				countU2W[content.author][0] --;
-				countUSW[content.author][rstZ] --;
+				countSVW[rstZ][word] ++;
+				countSW[rstZ] ++;
+				countU2W[content.author][0] ++;
+				countUSW[content.author][rstZ] ++;
 			} else {
-				countTVW[rstZ][word] --;
-				countTW[rstZ] --;
-				countU2W[content.author][1] --;
-				countUTW[content.author][rstZ] --;
+				countTVW[rstZ][word] ++;
+				countTW[rstZ] ++;
+				countU2W[content.author][1] ++;
+				countUTW[content.author][rstZ] ++;
 			}
 		}
 		
 		if (rstX == false) {
-			countU2R[content.author][0] --;
+			countU2R[content.author][0] ++;
 		} else {
-			countU2R[content.author][1] --;
+			countU2R[content.author][1] ++;
 		}
 
 	}
@@ -422,6 +433,7 @@ public class Model {
 	private int drawReply(int p, int w, Content content) {
 		// TODO Auto-generated method stub
 		int word;
+		
 		
 		HashMap<Integer, Integer> wordCnt = new HashMap<Integer, Integer>();
 		for (int i = 0; i < content.content.length; ++i) {
@@ -442,11 +454,20 @@ public class Model {
 			topicP[i] = (countU2R[u][0] + gamma[0]) 
 					* (countUSW[u][i] + salpha[i])
 					/ (countU2W[u][0] + salphaSum);
+//			System.out.println("topic i == " + topicP[i]);
+			
+//			if(topicP[i] < 0) {
+//				System.out.println(countU2R[u][0]);
+//				System.out.println(countUSW[u][i]);
+//				System.out.println(countU2W[u][0]);
+//				System.out.println("topic i == " + topicP[i]);
+//			}
 			
 			int t = 0;
 			Set s = wordCnt.entrySet();
 			Iterator it = s.iterator();
-			double bufferP = 0;
+			double bufferP = 1;
+			System.out.println("buffer P == " + bufferP);
 			while(it.hasNext()) {
 				Map.Entry m = (Map.Entry) it.next();
 				word = (Integer) m.getKey();
@@ -455,9 +476,12 @@ public class Model {
 					double value = (countSVW[i][word] + sbeta[word] + j)
 							/ (countSW[i] + sbetaSum + t);
 					t ++;
+//					System.out.println("value == " + value);
 					bufferP *= value;
+//					System.out.println("buffer P == " + bufferP);
 				}
 			}
+//			System.out.println("buffer P == " + bufferP);
 			topicP[i] *= Math.pow(bufferP, 1.0);
 		}
 		
@@ -465,12 +489,15 @@ public class Model {
 			// lost some thing
 			topicP[S + i] = (countU2R[u][1] + gamma[1]) 
 					* (countUTW[u][i] + talpha[i])
-					/ (countU2W[u][1] + talphaSum);
+					/ (countU2W[u][1] + talphaSum)
+					* (countPTW[p][i] + countPTR[p][i] + zalpha[i])
+					/ (posts.get(p).contents.get(0).content.length + posts.get(p).contents.size() - 1 - 1 + zalphaSum);
+//			System.out.println("topic i == " + topicP[S+i]);
 			
 			int t = 0;
 			Set s = wordCnt.entrySet();
 			Iterator it = s.iterator();
-			double bufferP = 0;
+			double bufferP = 1;
 			while(it.hasNext()) {
 				Map.Entry m = (Map.Entry) it.next();
 				word = (Integer) m.getKey();
@@ -484,6 +511,12 @@ public class Model {
 			}
 			topicP[S + i] *= Math.pow(bufferP, 1.0);
 		}
+		
+//		for (int i = 0; i < T+S; ++i) {
+//			System.out.print("  " + topicP[i]);
+//		}
+//		System.out.println("");
+		
 		
 		for (int i = 1; i < T+S; ++i) {
 			topicP[i] += topicP[i-1];
@@ -509,6 +542,7 @@ public class Model {
 		
 		z = drawZ(i, j, word);
 		
+		zw[i][j] = z;
 		countPTW[i][z] ++;
 		countTVW[z][word] ++;
 		countTW[z] ++;
@@ -551,26 +585,30 @@ public class Model {
 		
 		writer.write("Serious topics: \n");
 		for (int i = 0; i < T; ++i) {
+			writer.write("topic " + i + " -------------------- \n");
 			rankList.clear();
 			
 			ComUtil.getTop(tphi[i], rankList, topNum);
 			
 			for (int j = 0; j < rankList.size(); ++j) {
-				String tmp = "\t" + wordList.get(rankList.get(i)) + "\t"
-						+ tphi[rankList.get(i)];
+//				System.out.println("ranklist " + j + " == " + rankList.get(j));
+				String tmp = "\t" + wordList.get(rankList.get(j)) + "\t"
+						+ tphi[i][rankList.get(j)];
 				writer.write(tmp + "\n");
 			}
 		}
 		
 		writer.write("Unserious topics: \n");
 		for (int i = 0; i < S; ++i) {
+			writer.write("topic " + i + " -------------------- \n");
 			rankList.clear();
 			
 			ComUtil.getTop(sphi[i], rankList, topNum);
 			
 			for (int j = 0; j < rankList.size(); ++j) {
-				String tmp = "\t" + wordList.get(rankList.get(i)) + "\t"
-						+ sphi[rankList.get(i)];
+//				System.out.println("ranklist " + j + " == " + rankList.get(j));
+				String tmp = "\t" + wordList.get(rankList.get(j)) + "\t"
+						+ sphi[i][rankList.get(j)];
 				writer.write(tmp + "\n");
 			}
 		}

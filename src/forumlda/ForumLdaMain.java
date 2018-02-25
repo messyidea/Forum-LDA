@@ -17,11 +17,11 @@ public class ForumLdaMain {
 		// default parameters
 		String base = System.getProperty("user.dir") + "/data/";
 		String dataDir = base + "/forumdata/";
-		String dataFile = dataDir + "data.txt";
+		String dataFile = dataDir + "input.data";
 		String resDir = base + "/modelres/";
 		String modelParamsFile = base + "/modelParameters.txt";
 		String stopWordsFile = base + "/stopwords.txt";
-		String wordsOfTopics = resDir + "wordsoftopics.txt";
+		String wordsOfTopics = resDir + "wordsoftopics.rst";
 		
 		//CLI parse
 		Options options = new Options();
@@ -59,6 +59,7 @@ public class ForumLdaMain {
 		int authorNum = authorList.size();
 		int postNum = posts.size();
 		modelParams.getExtraParams(wordNum, authorNum, postNum);
+		modelParams.showParams();
 		
 		Model m = new Model(modelParams, posts);
 		m.intialize();
@@ -70,6 +71,8 @@ public class ForumLdaMain {
 	
 	public static void readPostFromFile(String filename, ArrayList<Post> posts, HashMap<String, Integer> wordMap, 
 			ArrayList<String> wordList, HashMap<String, Integer> authorMap, ArrayList<String> authorList) {
+		
+		System.out.println("Start load post from file.");
 		ArrayList<String> lines = new ArrayList<String>();
 		FileUtil.readLines(filename, lines);
 		
@@ -80,11 +83,25 @@ public class ForumLdaMain {
 				Post post = new Post(tPost, wordMap, wordList, authorMap, authorList);
 				if(post.id != -1) {
 					posts.add(post);
+					
+					if (posts.size() > 50 ) {
+						break;	// limit post size, for test
+					}
+					
 				}
 				continue;
 			} 
 			tPost.add(line);
 		}
+		
+//		System.out.println("start check");
+//		for (int i = 0; i < 2; ++i) {
+//			Post post = posts.get(i);
+//			System.out.println(post.contents.size());
+//		}
+//		System.out.println("end check");
+		
+		System.out.println("End load post from file.");
 	}
 	
 }
