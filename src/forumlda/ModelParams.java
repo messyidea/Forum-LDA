@@ -26,8 +26,6 @@ public class ModelParams {
 			String[] strArr = lines.get(i).split(":", 2);
 			String key = strArr[0].trim();
 			String value = strArr[1].trim();
-//			System.out.println("key == " + key);
-//			System.out.println("value == " + value);
 			switch(key) {
 			case "serious_topics":
 				this.T = Integer.parseInt(value);

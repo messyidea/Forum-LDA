@@ -403,9 +403,6 @@ public class Model {
 		x[p][w] = rstX;
 		zr[p][w] = rstZ;
 		
-//		System.out.println("r z == " + rstZ);
-		
-		
 		// recover
 		for (int i = 0; i < content.content.length; ++i) {
 			int word = content.content[i];
@@ -454,20 +451,11 @@ public class Model {
 			topicP[i] = (countU2R[u][0] + gamma[0]) 
 					* (countUSW[u][i] + salpha[i])
 					/ (countU2W[u][0] + salphaSum);
-//			System.out.println("topic i == " + topicP[i]);
-			
-//			if(topicP[i] < 0) {
-//				System.out.println(countU2R[u][0]);
-//				System.out.println(countUSW[u][i]);
-//				System.out.println(countU2W[u][0]);
-//				System.out.println("topic i == " + topicP[i]);
-//			}
 			
 			int t = 0;
 			Set s = wordCnt.entrySet();
 			Iterator it = s.iterator();
 			double bufferP = 1;
-//			System.out.println("buffer P == " + bufferP);
 			while(it.hasNext()) {
 				Map.Entry m = (Map.Entry) it.next();
 				word = (Integer) m.getKey();
@@ -476,24 +464,19 @@ public class Model {
 					double value = (countSVW[i][word] + sbeta[word] + j)
 							/ (countSW[i] + sbetaSum + t);
 					t ++;
-//					System.out.println("value == " + value);
 					bufferP *= value;
 					bufferP = isOverFlow(bufferP, pCount, i);
-//					System.out.println("buffer P == " + bufferP);
 				}
 			}
-//			System.out.println("buffer P == " + bufferP);
 			topicP[i] *= Math.pow(bufferP, 1.0);
 		}
 		
 		for (int i = 0; i < T; ++i) {
-			// lost some thing
 			topicP[S + i] = (countU2R[u][1] + gamma[1]) 
 					* (countUTW[u][i] + talpha[i])
 					/ (countU2W[u][1] + talphaSum)
 					* (countPTW[p][i] + countPTR[p][i] + zalpha[i])
 					/ (posts.get(p).contents.get(0).content.length + posts.get(p).contents.size() - 1 - 1 + zalphaSum);
-//			System.out.println("topic i == " + topicP[S+i]);
 			
 			int t = 0;
 			Set s = wordCnt.entrySet();
@@ -516,11 +499,6 @@ public class Model {
 		
 		reComputeProbs(topicP, pCount);
 		
-//		for (int i = 0; i < T+S; ++i) {
-//			System.out.print("  " + topicP[i]);
-//		}
-//		System.out.println("");
-		
 		
 		for (int i = 1; i < T+S; ++i) {
 			topicP[i] += topicP[i-1];
@@ -539,25 +517,15 @@ public class Model {
 
 	private void reComputeProbs(double[] topicP, int[] pCount) {
 		int max = pCount[0];
-		// System.out.print(max + " ");
 		for (int i = 1; i < pCount.length; ++i) {
 			if (pCount[i] > max)
 				max = pCount[i];
-			// System.out.print(pCount[i] + " ");
 		}
 		
 		for (int i = 0; i < pCount.length; i++) {
 			topicP[i] = topicP[i] * Math.pow(1e150, pCount[i] - max);
 		}
 		
-//		if (max > 0) {
-//			System.out.print(pCount[0] + " ");
-//			for (int i = 1; i < pCount.length; i++) {
-//				System.out.print(pCount[i] + " ");
-//			}
-//			System.out.println();
-//			// System.exit(0);
-//		}
 	}
 
 	private double isOverFlow(double bufferP, int[] pCount, int i) {
