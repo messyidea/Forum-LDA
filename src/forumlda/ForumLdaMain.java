@@ -81,6 +81,7 @@ public class ForumLdaMain {
 			String line = lines.get(i);
 			if (line.startsWith("-") || line.length() == 0) {
 				Post post = new Post(tPost, wordMap, wordList, authorMap, authorList);
+				tPost.clear();
 				if(post.id != -1) {
 					posts.add(post);
 					
